@@ -1,0 +1,11 @@
+# In directory: fraudshield-v3/api/
+cat <<EOF > requirements.txt
+fastapi
+uvicorn
+google-cloud-aiplatform
+pydantic
+google-cloud-storage
+# Used by the Feature Store client for low-latency calls
+google-cloud-bigquery
+protobuf>=3.19.5
+EOF

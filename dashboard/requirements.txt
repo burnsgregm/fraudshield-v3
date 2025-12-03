@@ -1,0 +1,9 @@
+streamlit
+google-cloud-bigquery
+google-cloud-aiplatform
+google-auth
+pandas
+plotly
+db-dtypes
+kfp
+google-cloud-pipeline-components
