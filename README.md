@@ -133,11 +133,10 @@ Terraform provisions:
 ```
 fraudshield-v3/
 ├── api/
-├── dataflow/
+├── streaming/
 ├── models/
 ├── terraform/
 ├── artifacts/
-├── notebooks/
 └── README.md
 ```
 
