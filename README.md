@@ -92,7 +92,7 @@ FraudShield V3 uses a **Custom Prediction Routine** to combine:
 2. Fetches online features from Feature Store
 3. Sends vector to Vertex Endpoint
 4. Returns fraud score + metadata
-
+![Dashboard Screenshot](./images/json.png)
 ---
 
 ## 📦 Model Management
@@ -111,7 +111,7 @@ Logged to BigQuery:
 - Feature snapshots  
 - Drift metrics  
 - Errors  
-
+![Dashboard Screenshot](./images/dashboard.png)
 ---
 
 ## 🏗️ Infrastructure-as-Code (Terraform)
