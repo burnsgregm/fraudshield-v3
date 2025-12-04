@@ -16,7 +16,7 @@ This version demonstrates **enterprise-grade MLOps patterns**, including:
 
 ## 📐 Architecture Diagram (V3)
 
-![Architecture](docs/Burns_Greg_CS_FraudShield_V3.svg)
+![Architecture](images/architecture.svg)
 
 ---
 
