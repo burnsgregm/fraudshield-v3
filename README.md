@@ -7,124 +7,33 @@ This version demonstrates **enterprise-grade MLOps patterns**, including:
 - **Real-time ingestion:** Pub/Sub → Dataflow (10-minute event-time sliding windows)
 - **Online feature serving:** Vertex AI Feature Store
 - **Hybrid modeling:** XGBoost (supervised) + Isolation Forest (unsupervised) + ensemble logic
-- **Model artifacts & deployment:** Cloud Storage + Vertex AI Endpoint
+- **Model deployment:** Vertex AI Endpoint + GCS model artifacts
 - **Low-latency online scoring:** FastAPI service
-- **Offline analytics & audit:** BigQuery (predictions, drift, feature distributions)
-- **Infrastructure-as-Code:** Terraform for GCP provisioning
+- **Offline analytics:** BigQuery (predictions, drift, feature distributions)
+- **Infrastructure-as-code:** Terraform modules provisioning all services
 
 ---
 
-## 📐 Architecture Diagram
+## 📐 Architecture Diagram (V3)
 
-```mermaid
-graph LR
-    %% Styles
-    classDef gcp_resource fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px;
-    classDef process fill:#E3F2FD,stroke:#1565C0,stroke-width:2px;
-    classDef storage fill:#FFF3E0,stroke:#EF6C00,stroke-width:2px;
-    classDef external fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px;
-
-    %% Nodes
-    Client(Client Application):::external
-    PubSub(Cloud Pub/Sub<br>Raw Events Topic):::gcp_resource
-    Dataflow(Cloud Dataflow<br>Streaming Pipeline<br>10m Sliding Window):::process
-    FeatureStore[(Vertex AI Feature Store<br>Online Store)]:::storage
-    BigQuery[(BigQuery<br>Offline Store)]:::storage
-    GCS[(Cloud Storage<br>Model Artifacts)]:::storage
-    API(FastAPI Service<br>Scoring API):::process
-    Endpoint(Vertex AI Endpoint<br>Hybrid Model Endpoint):::gcp_resource
-
-    subgraph CPR_Container [Custom Prediction Routine CPR]
-        style CPR_Container fill:#FAFAFA,stroke:#333,stroke-dasharray: 5 5
-        XGBoost(XGBoost Model<br>Supervised):::process
-        IsoForest(Isolation Forest<br>Unsupervised):::process
-        Ensemble(Ensemble Logic<br>Weighted Average):::process
-    end
-
-    %% Connections
-    Client -->|1. Publish Txn| PubSub
-    PubSub -->|2. Stream Events| Dataflow
-    Dataflow -->|3. Write Aggregates| FeatureStore
-    Dataflow -->|Archive Events + Features| BigQuery
-
-    Client -->|4. POST /v3/score| API
-    API -->|5. Fetch Features| FeatureStore
-    FeatureStore -->|Return Features| API
-
-    API -->|6. Send Vector| Endpoint
-    Endpoint -. hosts .- CPR_Container
-    Endpoint --> XGBoost
-    Endpoint --> IsoForest
-    XGBoost -->|Probability| Ensemble
-    IsoForest -->|Anomaly Score| Ensemble
-    Ensemble -->|7. Final Score| API
-    API -->|8. Score + Reason Codes| Client
-
-    GCS -->|Model Artifacts| Endpoint
-```
+![Architecture](docs/Burns_Greg_CS_FraudShield_V3.svg)
 
 ---
 
-## 🧠 Key Features
+## 🖼 Demo Screenshots
 
-### Hybrid Scoring Model (CPR Architecture)
-FraudShield V3 uses a **Custom Prediction Routine** to combine:
+### **FraudShield Operations Center**
+A Streamlit dashboard visualizing predictions, drift signals, score distributions, and system status.
 
-- **XGBoost** for supervised fraud classification  
-- **Isolation Forest** for unsupervised anomaly detection  
-- **A weighted ensemble** for a final normalized fraud probability  
+![Ops Dashboard](images/dashboard.png)
 
----
+### **API Scoring Example**
+Example of a real request to the `/v3/score` FastAPI endpoint showing:
+- Fraud score  
+- Component scores (XGBoost + Isolation Forest)  
+- Velocity features reconstructed from Feature Store  
 
-## ⚙️ Dataflow Streaming Pipeline
-
-- Event-time 10-minute sliding aggregation window  
-- Transaction velocity features (per `tenant_id` and `card_id`)  
-- Handles out-of-order event compensation  
-- Writes to **Vertex AI Feature Store**  
-- Archives to **BigQuery** for analytics  
-
----
-
-## 🧩 Online Scoring API (FastAPI)
-
-1. Accepts `POST /v3/score`
-2. Fetches online features from Feature Store
-3. Sends vector to Vertex Endpoint
-4. Returns fraud score + metadata
-![Dashboard Screenshot](./images/json.png)
----
-
-## 📦 Model Management
-
-- Artifacts in **GCS**
-- Deployment to **Vertex AI Endpoint**
-- Supports versioning & rollbacks
-
----
-
-## 📊 Monitoring & Observability
-
-Logged to BigQuery:
-
-- Predictions  
-- Feature snapshots  
-- Drift metrics  
-- Errors  
-![Dashboard Screenshot](./images/dashboard.png)
----
-
-## 🏗️ Infrastructure-as-Code (Terraform)
-
-Terraform provisions:
-
-- Pub/Sub  
-- Dataflow  
-- Feature Store entities  
-- Vertex Endpoint  
-- BigQuery datasets  
-- IAM  
-- GCS buckets  
+![API Response](images/json.png)
 
 ---
 
@@ -132,18 +41,101 @@ Terraform provisions:
 
 ```
 fraudshield-v3/
-├── api/
-├── streaming/
-├── models/
-├── terraform/
-├── artifacts/
+│
+├── api/                     # FastAPI scoring service
+│   ├── app/
+│   │   ├── main.py
+│   │   └── services/
+│   └── Dockerfile
+│
+├── dashboard/               # Streamlit monitoring UI
+│   └── app.py
+│
+├── streaming/               # Dataflow streaming pipeline
+│   ├── generate_stream.py
+│   ├── pipeline.py
+│   └── requirements.txt
+│
+├── pipelines/               # Training pipelines
+│   └── training/
+│       ├── pipeline_definition_v3.py
+│       └── components/
+│
+├── models/                  # Hybrid CPR model
+│   ├── train_hybrid.py
+│   └── ensemble_cpr/
+│       ├── predictor.py
+│       ├── requirements.txt
+│       └── Dockerfile
+│
+├── infra/                   # Terraform IaC
+│   └── terraform/
+│       ├── envs/dev/
+│       └── modules/
+│
+├── monitoring/              # Drift monitoring jobs
+│   └── monitoring_job.py
+│
+├── docs/                    # Versioned design docs
+│   ├── MCG - Personal - FraudShield V3.pdf
+│   └── SRS+TDD+DM - Personal - FraudShield V3.pdf
+│
+├── images/                  # Screenshots for README + portfolio
+│   ├── dashboard.png
+│   └── json.png
+│
 └── README.md
 ```
 
 ---
 
-## 📬 Contact
+## 🚀 Running Locally
 
-**Greg Burns — Machine Learning Engineer**  
-LinkedIn: https://www.linkedin.com/in/gregburns/  
-Portfolio: https://burnsgregm.netlify.app
+### **1. Start the FastAPI Scoring Service**
+```bash
+uvicorn api.app.main:app --reload --port 8000
+```
+
+Then open:
+
+```
+http://localhost:8000/docs
+```
+
+### **2. Trigger a Test Score**
+```bash
+curl -X POST "http://localhost:8000/v3/score"      -H "Content-Type: application/json"      -d '{
+            "transaction_id": "demo_tx_99",
+            "tenant_id": "tenant_A",
+            "card_id": "card_1234",
+            "amount": 950.0
+         }'
+```
+
+---
+
+## 📊 What FraudShield Demonstrates
+
+- Real-time ML system design  
+- Online feature engineering & serving  
+- Hybrid model architecture using CPR  
+- End-to-end MLOps with Terraform, monitoring, and retraining  
+- Production-style API engineering  
+
+---
+
+## 📎 Supporting Case Study
+
+Full case study (HTML version):  
+`docs/Burns_Greg_CS_FraudShield_V3.html`
+
+One-page executive summary:  
+`docs/Burns_Greg_CS_1P_FraudShield_V3.pdf`
+
+Architecture diagram:  
+`docs/Burns_Greg_CS_FraudShield_V3.svg`
+
+---
+
+## © Credits  
+Designed, implemented, and deployed by **Greg Burns**.
