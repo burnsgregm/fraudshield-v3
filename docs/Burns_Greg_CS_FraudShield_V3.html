@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FraudShield – Real-Time Fraud Detection (V1–V3)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050816;
+      --bg-alt: #0b1020;
+      --card: #0f172a;
+      --card-alt: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.1);
+      --accent-strong: #0ea5e9;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border-subtle: #1f2937;
+      --chip-bg: #020617;
+      --chip-border: #1f2937;
+      --danger: #f97373;
+      --success: #4ade80;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: #020617;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 32px 16px 48px;
+    }
+
+    @media (min-width: 900px) {
+      .page {
+        padding: 40px 24px 64px;
+      }
+    }
+
+    .page-header {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr);
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    @media (min-width: 960px) {
+      .page-header {
+        grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+        align-items: flex-start;
+      }
+    }
+
+    .title-block h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.9rem, 2.5vw + 1.4rem, 2.6rem);
+      letter-spacing: 0.02em;
+    }
+
+    .title-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #0f172a, #020617);
+      border: 1px solid #1e293b;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .title-pill span.dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+    }
+
+    .subtitle {
+      margin: 4px 0 12px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 48rem;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px 16px;
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .meta-label {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b7280;
+      margin-bottom: 1px;
+    }
+
+    .meta-value {
+      color: #e5e7eb;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      padding: 2px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--chip-border);
+      background: var(--chip-bg);
+      font-size: 0.76rem;
+      color: #cbd5f5;
+      white-space: nowrap;
+    }
+
+    .side-card {
+      border-radius: 18px;
+      border: 1px solid var(--border-subtle);
+      background: radial-gradient(circle at top left, #020617, #020617);
+      padding: 16px 16px 14px;
+    }
+
+    .side-card h3 {
+      margin: 0 0 8px;
+      font-size: 0.92rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #9ca3c9;
+    }
+
+    .side-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 8px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .side-card li {
+      margin-bottom: 4px;
+    }
+
+    .side-meta {
+      font-size: 0.78rem;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    .nav-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 18px 0 10px;
+    }
+
+    .nav-pill {
+      font-size: 0.78rem;
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .nav-pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .supporting-materials {
+      margin-bottom: 18px;
+      border-radius: 16px;
+      border: 1px solid #111827;
+      background: radial-gradient(circle at top left, #020617, #020617);
+      padding: 12px 14px 10px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 4px;
+      font-size: 0.86rem;
+    }
+
+    @media (min-width: 720px) {
+      .supporting-materials {
+        grid-template-columns: 160px minmax(0, 1fr);
+        align-items: start;
+      }
+    }
+
+    .supporting-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #9ca3c9;
+    }
+
+    .supporting-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+    }
+
+    .supporting-links a {
+      font-size: 0.86rem;
+      text-decoration: none;
+      color: var(--accent);
+    }
+
+    .supporting-links a span {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #9ca3c9;
+      display: block;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr);
+      gap: 18px;
+    }
+
+    @media (min-width: 980px) {
+      main {
+        grid-template-columns: minmax(0, 3.3fr) minmax(0, 1.7fr);
+        align-items: flex-start;
+      }
+    }
+
+    .stacked-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      border-radius: 18px;
+      background: radial-gradient(circle at top left, #020617, #020617);
+      border: 1px solid #111827;
+      padding: 16px 16px 12px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.55);
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 1.08rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #9ca3c9;
+    }
+
+    .card h3 {
+      margin: 0 0 6px;
+      font-size: 0.98rem;
+      color: #e5e7eb;
+    }
+
+    .card p {
+      margin: 0 0 7px;
+      font-size: 0.92rem;
+      color: #e5e7eb;
+    }
+
+    .card ul {
+      margin: 4px 0 6px 18px;
+      padding: 0;
+      font-size: 0.9rem;
+      color: #e5e7eb;
+    }
+
+    .card li {
+      margin-bottom: 3px;
+    }
+
+    .tagline {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .highlight {
+      border-radius: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent);
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      color: #e5f3ff;
+      margin-top: 6px;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    @media (min-width: 760px) {
+      .timeline {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .timeline-item {
+      position: relative;
+      border-radius: 14px;
+      padding: 10px 11px 10px;
+      background: #020617;
+      border: 1px solid #111827;
+    }
+
+    .timeline-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #9ca3c9;
+      margin-bottom: 2px;
+    }
+
+    .timeline-title {
+      font-size: 0.94rem;
+      margin-bottom: 4px;
+    }
+
+    .timeline-body {
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .pill-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.78rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.8);
+      color: #cbd5f5;
+      margin-right: 4px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .metric {
+      border-radius: 12px;
+      padding: 8px 10px;
+      border: 1px solid #111827;
+      background: #020617;
+      font-size: 0.86rem;
+    }
+
+    .metric-label {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3c9;
+      margin-bottom: 2px;
+    }
+
+    .metric-value {
+      font-size: 0.98rem;
+      font-weight: 500;
+    }
+
+    .metric-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .code-label {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.78rem;
+      background: #020617;
+      border-radius: 999px;
+      padding: 2px 7px;
+      border: 1px solid #1f2937;
+      color: #e5e7eb;
+    }
+
+    .roadmap-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px dashed rgba(148, 163, 184, 0.7);
+      color: #e5e7eb;
+      background: rgba(17, 24, 39, 0.9);
+      margin-bottom: 6px;
+    }
+
+    .roadmap-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #facc15;
+    }
+
+    figure.arch-diagram {
+      margin: 10px 0 4px;
+    }
+
+    figure.arch-diagram img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      border: 1px solid #111827;
+      display: block;
+    }
+
+    figure.arch-diagram figcaption {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      margin-top: 24px;
+      font-size: 0.78rem;
+      color: #4b5563;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="page-header">
+      <div class="title-block">
+        <div class="title-pill">
+          <span class="dot"></span>
+          <span>End-to-End Fraud Detection Platform</span>
+        </div>
+        <h1>FraudShield — Real-Time Fraud Detection (V1–V3)</h1>
+        <p class="subtitle">
+          A multi-release, production-style fraud detection platform I designed, architected, and
+          built end-to-end — evolving from a batch prototype into a real-time, multi-tenant
+          streaming engine with hybrid models and explainability.
+        </p>
+
+        <div class="nav-pills">
+          <a href="#overview" class="nav-pill">Overview</a>
+          <a href="#evolution" class="nav-pill">V1 → V3 Evolution</a>
+          <a href="#architecture" class="nav-pill">Architecture</a>
+          <a href="#results" class="nav-pill">Results</a>
+          <a href="#roadmap" class="nav-pill">Roadmap</a>
+        </div>
+
+        <div class="meta-grid">
+          <div>
+            <div class="meta-label">Role</div>
+            <div class="meta-value">Technical Product Owner, System Architect, MLOps Engineer, Lead Developer</div>
+          </div>
+          <div>
+            <div class="meta-label">Problem Space</div>
+            <div class="meta-value">Real-time payment fraud detection for multi-tenant financial platforms</div>
+          </div>
+          <div>
+            <div class="meta-label">Stack</div>
+            <div class="meta-value">
+              Python, FastAPI, XGBoost, Isolation Forest, SHAP, Google Cloud (Pub/Sub, Dataflow, Vertex AI, Feature Store, BigQuery), Terraform
+            </div>
+          </div>
+          <div>
+            <div class="meta-label">Status</div>
+            <div class="meta-value">V3 implemented · V4 roadmap defined</div>
+          </div>
+        </div>
+
+        <div class="chip-row">
+          <span class="chip">Real-Time Streaming</span>
+          <span class="chip">Hybrid Models</span>
+          <span class="chip">MLOps</span>
+          <span class="chip">Explainable AI</span>
+          <span class="chip">Multi-Tenant</span>
+        </div>
+      </div>
+
+      <aside class="side-card">
+        <h3>Business Objectives</h3>
+        <ul>
+          <li>Detect fraud in sub-second decision windows.</li>
+          <li>Reduce false positives without compromising safety.</li>
+          <li>Provide explainable, auditable decisions.</li>
+          <li>Automate model lifecycle & drift handling.</li>
+          <li>Support a multi-tenant SaaS fraud platform.</li>
+        </ul>
+        <div class="side-meta">
+          FraudShield is designed as if it were powering a real payment processor, not a toy dataset.
+        </div>
+      </aside>
+    </header>
+
+    <section class="supporting-materials">
+      <div class="supporting-label">Supporting Materials</div>
+      <div class="supporting-links">
+        <a href="https://github.com/burnsgregm/fraudshield-v3" target="_blank" rel="noopener noreferrer">
+          <span>Source Code</span>
+          GitHub Repository
+        </a>
+        <a href="Burns_Greg_CS_1P_FraudShield_V3.pdf" target="_blank" rel="noopener noreferrer">
+          <span>Executive Summary</span>
+          One-Page PDF
+        </a>
+        <a href="Burns_Greg_CS_FraudShield_V3.svg" target="_blank" rel="noopener noreferrer">
+          <span>Architecture</span>
+          Full SVG Diagram
+        </a>
+      </div>
+    </section>
+
+    <main>
+      <div class="stacked-cards">
+        <!-- OVERVIEW -->
+        <section id="overview" class="card">
+          <h2>01 · Overview</h2>
+          <p class="tagline">
+            FraudShield started as a single fraud model and grew into a full-stack, real-time fraud detection
+            platform with streaming features, hybrid models, explainability, drift monitoring, and automated retraining.
+          </p>
+          <p>
+            Most fraud systems fail because they are either too slow (batch jobs and offline scoring),
+            too opaque (no explainability or audit trail), or too fragile (no drift monitoring or
+            retraining strategy). FraudShield is my response to that: a deliberately phased platform
+            that evolves in three releases:
+          </p>
+          <ul>
+            <li><strong>V1:</strong> Baseline fraud classifier & feature engineering.</li>
+            <li><strong>V2:</strong> Full ML lifecycle with SHAP, drift detection, and automated retraining.</li>
+            <li><strong>V3:</strong> Real-time streaming features, hybrid ensemble, and schema-level multi-tenancy.</li>
+          </ul>
+          <div class="highlight">
+            This is not just “a model project.” It’s a realistic, multi-release product evolution that
+            demonstrates how I think about designing, building, and maturing enterprise AI systems.
+          </div>
+        </section>
+
+        <!-- EVOLUTION TIMELINE -->
+        <section id="evolution" class="card">
+          <h2>02 · Version Evolution (V1 → V3)</h2>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-label">V1 · Foundation</div>
+              <div class="timeline-title">Baseline Fraud Classifier</div>
+              <div class="timeline-body">
+                <ul>
+                  <li>Curated schema & dataset for fraud vs. non-fraud.</li>
+                  <li>Engineered behavioral features (amounts, frequency, device/account patterns).</li>
+                  <li>Trained XGBoost model with SHAP-based inspection.</li>
+                  <li>Simple batch-mode scoring API.</li>
+                </ul>
+                <span class="pill-inline">Goal: Feasibility & modeling baseline</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-label">V2 · Platform</div>
+              <div class="timeline-title">Lifecycle + Explainability</div>
+              <div class="timeline-body">
+                <ul>
+                  <li>Production-style FastAPI scoring service (sub-150ms typical latency).</li>
+                  <li>SHAP explanations for each prediction.</li>
+                  <li>Drift monitoring and metrics tracking.</li>
+                  <li>Automated weekly retraining and model promotion.</li>
+                </ul>
+                <span class="pill-inline">Goal: Enterprise ML lifecycle</span>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-label">V3 · Engine</div>
+              <div class="timeline-title">Streaming + Hybrid Ensemble</div>
+              <div class="timeline-body">
+                <ul>
+                  <li>Real-time streaming features via Dataflow + Feature Store.</li>
+                  <li>Hybrid XGBoost + Isolation Forest CPR ensemble.</li>
+                  <li>Schema-level multi-tenant design (<span class="code-label">tenant_id</span> everywhere).</li>
+                  <li>Tight integration of streaming features into the scoring API.</li>
+                </ul>
+                <span class="pill-inline">Goal: Low-latency, platform-grade fraud engine</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ARCHITECTURE -->
+        <section id="architecture" class="card">
+          <h2>03 · Architecture & System Design</h2>
+          <h3>End-to-End Flow</h3>
+          <p>
+            FraudShield spans ingestion, feature engineering, model training, online prediction,
+            monitoring, and retraining. At a high level:
+          </p>
+          <ul>
+            <li><strong>Ingestion:</strong> Transactions flow into Pub/Sub with <span class="code-label">tenant_id</span>, <span class="code-label">card_id</span>, amount, and timestamps.</li>
+            <li><strong>Streaming Features (V3):</strong> Dataflow uses event-time semantics (10-minute sliding windows, 1-minute advance, 5-minute allowed lateness) to compute velocity features and write them into Vertex AI Feature Store.</li>
+            <li><strong>Model Training:</strong> XGBoost is trained on labeled fraud data; Isolation Forest is trained on normal transactions only.</li>
+            <li><strong>Hybrid CPR Model:</strong> A custom prediction routine (CPR) container loads both models, normalizes outputs, and combines them into a single fraud score.</li>
+            <li><strong>Online Scoring API:</strong> FastAPI fetches streaming features + base features, calls the CPR endpoint, and returns the fraud score + SHAP metadata.</li>
+            <li><strong>Monitoring & Retraining (V2+):</strong> Drift metrics and performance stats are logged; scheduled retraining jobs update models and endpoints.</li>
+          </ul>
+
+          <figure class="arch-diagram">
+            <img src="Burns_Greg_CS_FraudShield_V3.svg" alt="FraudShield V3 architecture diagram" />
+            <figcaption>FraudShield V3 architecture: Pub/Sub → Dataflow → Vertex AI Feature Store → Hybrid CPR Endpoint → FastAPI Scoring API → BigQuery.</figcaption>
+          </figure>
+
+<figure class="arch-diagram">
+  <img src="Burns_Greg_CS_FraudShield_V3_screen1.png"
+       alt="FraudShield V3 Operations Center dashboard with score distribution and drift monitor" />
+  <figcaption>
+    FraudShield V3 Operations Center dashboard: live score distribution, drift monitor, model status,
+    and streaming engine health, as viewed by fraud operations.
+  </figcaption>
+</figure>
+
+<figure class="arch-diagram">
+  <img src="Burns_Greg_CS_FraudShield_V3_screen2.png"
+       alt="FastAPI Swagger UI showing a POST /v3/score request and fraudshield-hybrid-v1 response payload" />
+  <figcaption>
+    FastAPI scoring API example: a real <code>POST /v3/score</code> request with the hybrid model response,
+    including overall fraud score, component scores, and reconstructed velocity features.
+  </figcaption>
+</figure>
+
+          <h3>Key Design Decisions</h3>
+          <ul>
+            <li><strong>Event-time correctness:</strong> Transactions are timestamped using their event time, not processing time, avoiding skewed windows and unreliable velocity metrics.</li>
+            <li><strong>Feature store integration:</strong> Velocity features are written to Vertex AI Feature Store keyed by <span class="code-label">tenant_id#card_id</span>, ensuring consistent state across batch and online paths.</li>
+            <li><strong>Hybrid ensemble:</strong> XGBoost captures supervised patterns; Isolation Forest flags unusual behavior. The ensemble score balances precision and recall.</li>
+            <li><strong>Explainable by design:</strong> SHAP explanations are built into the scoring path so fraud analysts could audit “why” a transaction was flagged.</li>
+            <li><strong>Terraform-first:</strong> All core infrastructure (endpoints, feature store, Dataflow jobs, Pub/Sub, BigQuery, IAM) is defined as code.</li>
+          </ul>
+
+          <div class="highlight">
+            In the live portfolio, this diagram is paired with a deeper explanation of how Pub/Sub, Dataflow,
+            Feature Store, the hybrid CPR endpoint, and the FastAPI scoring service work together end-to-end.
+          </div>
+        </section>
+
+        <!-- RESULTS -->
+        <section id="results" class="card">
+          <h2>04 · Results & Impact</h2>
+          <p class="tagline">
+            Each version had specific goals. By V3, FraudShield behaves like a realistic fraud engine
+            suitable for a modern fintech or payments platform.
+          </p>
+
+          <div class="metric-grid">
+            <div class="metric">
+              <div class="metric-label">False Positive Reduction</div>
+              <div class="metric-value">≈ 30% ↓</div>
+              <div class="metric-note">V2 vs. V1 through better features, calibration, and drift tracking.</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Latency (End-to-End)</div>
+              <div class="metric-value">90–180ms</div>
+              <div class="metric-note">V3 scoring pipeline including feature reads and hybrid model inference.</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Feature Freshness</div>
+              <div class="metric-value">≤ 60s</div>
+              <div class="metric-note">Streaming velocity features updated via 10-minute sliding window with 1-minute advance.</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Coverage</div>
+              <div class="metric-value">Multi-Tenant</div>
+              <div class="metric-note">Schema-level isolation with <span class="code-label">tenant_id</span> on all entities.</div>
+            </div>
+          </div>
+
+          <h3 style="margin-top:10px;">What This Demonstrates About My Skillset</h3>
+          <ul>
+            <li>Designing phased, realistic AI product roadmaps (V1 → V2 → V3).</li>
+            <li>Building streaming feature engines that respect event-time semantics and windowing.</li>
+            <li>Implementing hybrid fraud models that combine supervised and unsupervised techniques.</li>
+            <li>Owning the full ML lifecycle: from data to deployment to monitoring and retraining.</li>
+            <li>Thinking like a platform engineer: multi-tenancy, infra-as-code, and observability.</li>
+          </ul>
+        </section>
+
+        <!-- ROADMAP -->
+        <section id="roadmap" class="card">
+          <h2>05 · Future Roadmap (V4+)</h2>
+          <div class="roadmap-badge">
+            <span class="roadmap-dot"></span>
+            <span>Planned, not yet implemented</span>
+          </div>
+          <p>
+            Although V3 is a complete, realistic fraud detection engine,
+            I’ve already designed a V4 roadmap to push into network intelligence and richer governance.
+          </p>
+          <ul>
+            <li><strong>Graph-based features:</strong> GraphSAGE or similar GNN over customer–device–IP graphs to capture network-level fraud patterns.</li>
+            <li><strong>Active learning loop:</strong> Feedback endpoint for fraud analysts; labels flow into a governed training view for future models.</li>
+            <li><strong>Hard multi-tenancy:</strong> Resource-level isolation (RLS, per-tenant projects/datasets) for highly regulated environments.</li>
+            <li><strong>Advanced anomaly detection:</strong> Embedding-based anomaly scores layered onto the existing hybrid ensemble.</li>
+            <li><strong>Model governance workflows:</strong> Explicit promotion, approval, and rollback workflows for new models.</li>
+          </ul>
+          <p>
+            For the purposes of my portfolio and near-term job search, I intentionally stopped at V3: a fully
+            implemented, credible platform — with V4 reserved as strategic future upside.
+          </p>
+        </section>
+      </div>
+
+      <!-- RIGHT SIDEBAR -->
+      <aside class="side-card">
+        <h3>Key Capabilities</h3>
+        <ul>
+          <li>End-to-end ML system design (V1–V3).</li>
+          <li>Real-time streaming features (Dataflow + Feature Store).</li>
+          <li>Hybrid fraud modeling via CPR.</li>
+          <li>Explainable predictions (SHAP integration).</li>
+          <li>Drift monitoring & automated retraining.</li>
+          <li>Schema-level multi-tenant architecture.</li>
+          <li>Terraform-based infra provisioning.</li>
+        </ul>
+
+        <h3 style="margin-top:10px;">Code & Artifacts</h3>
+        <ul>
+          <li><a href="https://github.com/burnsgregm/fraudshield-v3" target="_blank" rel="noopener noreferrer">GitHub repository (full source)</a></li>
+          <li>Training pipeline (XGBoost + Isolation Forest).</li>
+          <li>Custom CPR container + FastAPI scoring service.</li>
+          <li>Dataflow streaming pipeline.</li>
+          <li>Terraform modules for endpoints, feature store, Pub/Sub, BigQuery.</li>
+        </ul>
+
+        <div class="side-meta">
+          Full source code, configuration, and environment details are available in the project repository.
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      FraudShield — Personal project designed, architected, and implemented end-to-end.
+    </footer>
+  </div>
+</body>
+</html>
