@@ -12,7 +12,7 @@ import os
 # Page Config
 st.set_page_config(
     page_title="FraudShield V3 Operations",
-    page_icon="í ½í»¡ï¸",
+    page_icon="ğŸ›¡ï¸",
     layout="wide"
 )
 
@@ -62,7 +62,7 @@ def generate_mock_data():
     return pd.DataFrame(data)
 
 # --- SIDEBAR ---
-st.sidebar.title("í ½í»¡ï¸ FraudShield V3")
+st.sidebar.title("ğŸ›¡ï¸ FraudShield V3")
 st.sidebar.markdown(f"**Project:** `{PROJECT_ID}`")
 mode = st.sidebar.radio("Data Source", ["Live Stream (Demo)", "BigQuery (Offline)"])
 
@@ -89,7 +89,7 @@ if mode == "Live Stream (Demo)":
     with st.spinner('Fetching real-time predictions from Pub/Sub...'):
         time.sleep(0.5) 
     df = generate_mock_data()
-    st.sidebar.success("í ½í¿¢ System Status: ONLINE")
+    st.sidebar.success("ğŸŸ¢ System Status: ONLINE")
     st.sidebar.info("Streaming Engine: Active\n\nEndpoint: fraudshield-hybrid-endpoint")
 
 else:
